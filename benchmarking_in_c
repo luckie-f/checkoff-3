@@ -1,15 +1,38 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
+//benchmarking test which measures the worst case time of linear searching 
+int linear_search(int *arr, size_t n, int target) {
+    for (size_t i = 0; i < n; i++)
+        if (arr[i] == target) return (int)i;
+    return -1;
+}
+
+static double elapsed_sec(struct timespec a, struct timespec b) {
+    return (b.tv_sec - a.tv_sec) + (b.tv_nsec - a.tv_nsec) / 1e9;
+}
+
 int main(void) {
-    struct timespec t0, t1;
+    size_t n = 10000000;
+    int *arr = malloc(n * sizeof *arr);
+    for (size_t i = 0; i < n; i++) arr[i] = (int)i;
 
-    clock_gettime(CLOCK_MONOTONIC, &t0);
-    // ... code to measure ...
-    clock_gettime(CLOCK_MONOTONIC, &t1);
+    int reps = 20;
+    double best = 1e9;
+    int idx = 0;
 
-    double ms = (t1.tv_sec - t0.tv_sec) * 1e3
-              + (t1.tv_nsec - t0.tv_nsec) / 1e6;
-    printf("Elapsed: %.3f ms\n", ms);
+    for (int r = 0; r < reps; r++) {
+        struct timespec t0, t1;
+        clock_gettime(CLOCK_MONOTONIC, &t0);
+        idx = linear_search(arr, n, -1);      // worst case: not found
+        clock_gettime(CLOCK_MONOTONIC, &t1);
+
+        double t = elapsed_sec(t0, t1);
+        if (t < best) best = t;
+    }
+
+    printf("result=%d best=%.6f s\n", idx, best);   // use idx so the work isn't optimized away
+    free(arr);
     return 0;
 }
