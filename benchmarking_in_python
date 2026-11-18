@@ -1,0 +1,22 @@
+import timeit
+# benchmarking in python for linear search in array
+def linear_search(arr, target):
+    for i in range(len(arr)):
+        if arr[i] == target:
+            return i
+    return -1
+
+n = 10_000_000
+arr = list(range(n))          # setup: outside the timed region
+
+reps = 7        # independent measurements (like the C loop's 20 reps)
+number = 1      # how many calls per measurement
+
+times = timeit.repeat(
+    lambda: linear_search(arr, -1),   # worst case: not found
+    number=number,
+    repeat=reps,
+)
+
+best = min(times) / number
+print(f"best = {best:.6f} s per call")
